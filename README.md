@@ -1,3 +1,4 @@
 ### Demo
 
-https://code-sync.codersgyan.com/
+Realtime Code collaboration App on server side running using websockets
+
