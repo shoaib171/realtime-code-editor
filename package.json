@@ -20,6 +20,7 @@
     "socket.io-client": "^4.4.1",
     "util": "^0.12.5",
     "uuid": "^8.3.2",
+    "vm2": "^3.9.19",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

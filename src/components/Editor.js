@@ -5,16 +5,7 @@ import "codemirror/theme/dracula.css";
 import "codemirror/mode/javascript/javascript";
 import "codemirror/addon/edit/closetag";
 import "codemirror/addon/edit/closebrackets";
-import "codemirror/addon/lint/lint";
-import "codemirror/addon/lint/lint.css";
-import "codemirror/addon/lint/javascript-lint";
-import { JSHINT } from "jshint"; // Use named import
 import ACTIONS from "../Actions";
-
-// Ensure JSHint is available for CodeMirror
-if (!window.JSHINT) {
-  window.JSHINT = JSHINT; // Set it only if not already defined
-}
 
 const Editor = ({ socketRef, roomId, onCodeChange }) => {
   const editorRef = useRef(null);
@@ -29,8 +20,6 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
           autoCloseTags: true,
           autoCloseBrackets: true,
           lineNumbers: true,
-          lint: true,
-          gutters: ["CodeMirror-lint-markers"],
         }
       );
 

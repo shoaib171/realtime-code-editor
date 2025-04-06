@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import ACTIONS from "../Actions";
 import Client from "../components/Client";
 import Editor from "../components/Editor";
+import OutputPanel from "../components/OutputPanel";
 import { initSocket } from "../socket";
 import {
   useLocation,
@@ -18,6 +19,8 @@ const EditorPage = () => {
   const { roomId } = useParams();
   const reactNavigator = useNavigate();
   const [clients, setClients] = useState([]);
+  const [output, setOutput] = useState("Run your code to see the output here");
+  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -52,6 +55,12 @@ const EditorPage = () => {
         }
       );
 
+      // Listening for code output
+      socketRef.current.on(ACTIONS.CODE_OUTPUT, ({ output }) => {
+        setOutput(output);
+        setIsRunning(false);
+      });
+
       // Listening for disconnected
       socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
         toast.success(`${username} left the room.`);
@@ -62,9 +71,10 @@ const EditorPage = () => {
     };
     init();
     return () => {
-      socketRef.current.disconnect();
-      socketRef.current.off(ACTIONS.JOINED);
-      socketRef.current.off(ACTIONS.DISCONNECTED);
+      socketRef.current?.disconnect();
+      socketRef.current?.off(ACTIONS.JOINED);
+      socketRef.current?.off(ACTIONS.DISCONNECTED);
+      socketRef.current?.off(ACTIONS.CODE_OUTPUT);
     };
   }, []);
 
@@ -80,6 +90,21 @@ const EditorPage = () => {
 
   function leaveRoom() {
     reactNavigator("/");
+  }
+
+  function runCode() {
+    if (!codeRef.current) {
+      toast.error("No code to run!");
+      return;
+    }
+
+    setIsRunning(true);
+    setOutput("Running your code...");
+
+    socketRef.current.emit(ACTIONS.RUN_CODE, {
+      roomId,
+      code: codeRef.current,
+    });
   }
 
   if (!location.state) {
@@ -103,6 +128,9 @@ const EditorPage = () => {
         <button className="btn copyBtn" onClick={copyRoomId}>
           Copy ROOM ID
         </button>
+        <button className="btn runBtn" onClick={runCode} disabled={isRunning}>
+          {isRunning ? "Running..." : "Run Code"}
+        </button>
         <button className="btn leaveBtn" onClick={leaveRoom}>
           Leave
         </button>
@@ -115,6 +143,7 @@ const EditorPage = () => {
             codeRef.current = code;
           }}
         />
+        <OutputPanel output={output} />
       </div>
     </div>
   );
